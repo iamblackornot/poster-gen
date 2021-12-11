@@ -1,0 +1,3 @@
+RewriteRule /?\.htaccess$ - [F,L]
+
+RewriteRule ^email\.txt$ - [F,L]
