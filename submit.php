@@ -1,16 +1,8 @@
 <?php
 
 $templatesFolder = "./templates/";
-$submissionFolder = "./groups/";
 $posterHTML = "index.html";
 $posterWAV = "nonar.wav";
-
-if(!file_exists($submissionFolder)) {
-    if(!mkdir($submissionFolder, 0755, true)) {
-        addToLogs("failed to create submission folder");
-        exit;
-    }
-}
 
 $data = json_decode(file_get_contents('php://input'), true);
 
@@ -24,9 +16,7 @@ try {
     $smallImage = getDataProperty($data, 'smallImage'); 
     $largeImage = getDataProperty($data, 'largeImage'); 
     $xlargeImage = getDataProperty($data, 'xlargeImage'); 
-    $base64qrcode = getDataProperty($data, 'base64qrcode');
 
-    $template = getDataProperty($data, 'template'); 
     $posterid = getDataProperty($data, 'posterid'); 
     $eventid = getDataProperty($data, 'eventid'); 
     $email = getDataProperty($data, 'email'); 
@@ -35,13 +25,17 @@ try {
     $authors = getDataProperty($data, 'authors'); 
     $affiliates = getDataProperty($data, 'affiliates'); 
     $keywords = getDataProperty($data, 'keywords'); 
+    $template = getDataProperty($data, 'template'); 
+    $template = getDataProperty($data, 'template'); 
+    $groupFolder = getDataProperty($data, 'folder'); 
 
+    $base64qrcode = $data['base64qrcode'];
     $narrationWavUrl = $data['narrationWavUrl']; 
     $pdfUrl = getDataProperty($data, 'pdfUrl'); 
 
     //file_put_contents('last.txt', print_r($data, true));
 
-    $posterFolder = $submissionFolder.$eventid."/".$posterid."/";
+    $posterFolder = "./".$groupFolder."/".$eventid."/".$posterid."/";
 
     if(!file_exists($posterFolder)) {
         if(!mkdir($posterFolder, 0755, true)) {
@@ -80,8 +74,10 @@ try {
     $decoded=base64_decode($xlargeImage); 
     file_put_contents($posterFolder."xlarge-image.jpg", $decoded);
 
-    $decoded=base64_decode($base64qrcode); 
-    file_put_contents($posterFolder."qr.png", $decoded);
+    if(!empty($base64qrcode)) {
+        $decoded=base64_decode($base64qrcode); 
+        file_put_contents($posterFolder."qr.png", $decoded);
+    }
 
     echo 'ok';
 
