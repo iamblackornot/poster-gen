@@ -3,6 +3,7 @@
 $templatesFolder = "./templates/";
 $posterHTML = "index.html";
 $posterWAV = "nonar.wav";
+$nonCopyFiles = array("small-image.jpg", "large-image.jpg", "project.mobirise");
 
 $data = json_decode(file_get_contents('php://input'), true);
 
@@ -13,38 +14,29 @@ if(empty($data)) {
 
 try {
 
-    $smallImage = getDataProperty($data, 'smallImage'); 
-    $largeImage = getDataProperty($data, 'largeImage'); 
-    $xlargeImage = getDataProperty($data, 'xlargeImage'); 
+    $smallImage = getDataProperty($data, 'smallImage', false); 
+    $largeImage = getDataProperty($data, 'largeImage', false); 
+    $xlargeImage = getDataProperty($data, 'xlargeImage', false); 
 
     $posterid = getDataProperty($data, 'posterid'); 
-    $eventid = getDataProperty($data, 'eventid'); 
+    $eventid = getDataProperty($data, 'eventid', false);
     $email = getDataProperty($data, 'email'); 
     $abstract = getDataProperty($data, 'abstract'); 
     $title = getDataProperty($data, 'title'); 
     $authors = getDataProperty($data, 'authors'); 
     $affiliates = getDataProperty($data, 'affiliates'); 
     $keywords = getDataProperty($data, 'keywords'); 
-    $template = getDataProperty($data, 'template'); 
-    $template = getDataProperty($data, 'template'); 
+    $template = getDataProperty($data, 'template');  
     $groupFolder = getDataProperty($data, 'folder'); 
 
-    $base64qrcode = $data['base64qrcode'];
-    $narrationWavUrl = $data['narrationWavUrl']; 
+
+    $base64qrcode = getDataProperty($data, 'base64qrcode', false);
+    $narrationWavUrl = getDataProperty($data, 'narrationWavUrl', false);
     $pdfUrl = getDataProperty($data, 'pdfUrl'); 
 
-    //file_put_contents('last.txt', print_r($data, true));
-
-    $posterFolder = "./".$groupFolder."/".$eventid."/".$posterid."/";
-
-    if(!file_exists($posterFolder)) {
-        if(!mkdir($posterFolder, 0755, true)) {
-            addToLogs("failed to create poster folder [".$eventid."/".$posterid."]");
-            exit;
-        }
-    }
-
-    dir_copy($templatesFolder.$template."/", $posterFolder);
+    $posterFolder = createPosterFolder(getPosterPath($groupFolder, $eventid, $posterid));
+   
+    dir_copy($templatesFolder.$template."/", $posterFolder, $nonCopyFiles);
 
     rename($posterFolder.$posterHTML, $posterFolder.$posterid.".html");
     rename($posterFolder.$posterWAV, $posterFolder.$posterid.".wav");
@@ -65,14 +57,20 @@ try {
 
     file_put_contents($posterFolder.$posterid.".html", str_replace($tags, $replace, $html));
 
-    $decoded=base64_decode($smallImage); 
-    file_put_contents($posterFolder."small-image.jpg", $decoded);
+    if(!empty($smallImage)) {
+        $decoded=base64_decode($smallImage); 
+        file_put_contents($posterFolder."small-image.jpg", $decoded);
+    }
 
-    $decoded=base64_decode($largeImage); 
-    file_put_contents($posterFolder."large-image.jpg", $decoded);
+    if(!empty($largeImage)) {
+        $decoded=base64_decode($largeImage); 
+        file_put_contents($posterFolder."large-image.jpg", $decoded);
+    }
 
-    $decoded=base64_decode($xlargeImage); 
-    file_put_contents($posterFolder."xlarge-image.jpg", $decoded);
+    if(!empty($xlargeImage)) {
+        $decoded=base64_decode($xlargeImage); 
+        file_put_contents($posterFolder."xlarge-image.jpg", $decoded);
+    }
 
     if(!empty($base64qrcode)) {
         $decoded=base64_decode($base64qrcode); 
@@ -90,16 +88,21 @@ function addToLogs($text) {
     file_put_contents('logs.txt', $text.PHP_EOL, FILE_APPEND | LOCK_EX);
 }
 
-function getDataProperty($data, $name) {
+function getDataProperty($data, $name, $required = true, $defaultValue = '') {
     if(isset($data[$name]) && $data[$name] != "") {
         return $data[$name];
     } else {
-        addToLogs("post data property [".$name."] is undefined");
-        exit;
+
+        if($required) {
+            addToLogs("post data property [".$name."] is undefined");
+            exit;
+        } else {
+            return $defaultValue;
+        }
     }
 }
 
-function dir_copy( $source, $target ) {
+function dir_copy( $source, $target, $nonCopyFiles ) {
     if ( is_dir( $source ) ) {
         mkdir( $target, 0755, true );
         $d = dir( $source );
@@ -112,11 +115,21 @@ function dir_copy( $source, $target ) {
                 dir_copy( $Entry, $target . '/' . $entry );
                 continue;
             }
+
+            if(in_array($entry, $nonCopyFiles)) {
+                continue;
+            }
+
             copy( $Entry, $target . '/' . $entry );
         }
 
         $d->close();
     }else {
+
+        if(in_array($entry, $nonCopyFiles)) {
+            return;
+        }
+
         copy( $source, $target );
     }
 }
@@ -141,4 +154,52 @@ function download($url, $path) {
     fclose($fp);
 }
 
+function getPosterPath($groupFolder, $eventid, $posterid) {
+
+    $posterFolder = "./".$groupFolder."/";//.$eventid."/".$posterid."/";
+
+    if(!empty($eventid)) {
+        $posterFolder = $posterFolder.$eventid."/";
+    }
+
+    $posterFolder = $posterFolder.$posterid."/";
+
+    return $posterFolder;
+}
+
+function createPosterFolder($posterFolder) {
+
+    if(!file_exists($posterFolder)) {
+        
+        createFolder($posterFolder);
+        return $posterFolder;
+    } else {
+
+        $inc = 1;
+        
+        while($inc < 100) {
+
+            $newFolderName = substr_replace($posterFolder, "-".$inc, -1, -1);
+
+            if(!file_exists($newFolderName)) {
+        
+                createFolder($newFolderName);
+                return $newFolderName;
+            }
+
+            $inc += 1;
+        }
+    }
+
+    addToLogs("failed to create folder [".$posterFolder."] (while cycle didn't help)");
+    exit;
+}
+
+function createFolder($folder) {
+
+    if(!mkdir($folder, 0755, true)) {
+        addToLogs("failed to create folder [".$folder."]");
+        exit;
+    }
+}
 ?>
