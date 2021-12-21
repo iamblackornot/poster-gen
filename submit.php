@@ -3,6 +3,7 @@
 $templatesFolder = "./templates/";
 $posterHTML = "index.html";
 $posterWAV = "nonar.wav";
+$adminPassFile = "pass-admin.txt";
 $nonCopyFiles = array("small-image.jpg", "large-image.jpg", "project.mobirise");
 
 $data = json_decode(file_get_contents('php://input'), true);
@@ -28,6 +29,7 @@ try {
     $keywords = getDataProperty($data, 'keywords'); 
     $template = getDataProperty($data, 'template');  
     $groupFolder = getDataProperty($data, 'folder'); 
+    $adminPassword = getDataProperty($data, 'adminPassword', false); 
 
 
     $base64qrcode = getDataProperty($data, 'base64qrcode', false);
@@ -75,6 +77,10 @@ try {
     if(!empty($base64qrcode)) {
         $decoded=base64_decode($base64qrcode); 
         file_put_contents($posterFolder."qr.png", $decoded);
+    }
+
+    if(!empty($adminPassword)) {
+        file_put_contents($posterFolder.$adminPassFile, $adminPassword);
     }
 
     echo 'ok';
