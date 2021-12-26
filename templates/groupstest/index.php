@@ -1,6 +1,6 @@
 <?php
 
-$posterPassFile = "pass-poster.txt";
+$posterPassFile = "admin/pass-poster.txt";
 
 $posterid = basename(dirname(__FILE__));
 

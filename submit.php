@@ -3,7 +3,7 @@
 $templatesFolder = "./templates/";
 $posterHTML = "index.html";
 $posterWAV = "nonar.wav";
-$adminPassFile = "pass-admin.txt";
+$adminPassFile = "admin/pass-admin.txt";
 $nonCopyFiles = array("small-image.jpg", "large-image.jpg", "project.mobirise");
 
 $data = json_decode(file_get_contents('php://input'), true);
