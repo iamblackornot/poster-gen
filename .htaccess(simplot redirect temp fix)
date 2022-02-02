@@ -1,0 +1,10 @@
+RewriteEngine on
+
+RewriteCond %{HTTP_HOST}@@%{HTTP_REFERER} !^([^@]*)@@https?://\1/.*
+
+RewriteRule ^simplot\.html$ https://www.posterpresentations.com/research/groups/simplot/ [R=301,NC,L]
+
+RewriteCond %{HTTP_HOST}@@%{HTTP_REFERER} !^([^@]*)@@https?://\1/.*
+
+RewriteRule ^.*\.(jpg|jpeg|gif|csv|pdf|wav|html|css|js|txt)$ - [NC,F]
+

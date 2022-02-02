@@ -5,6 +5,8 @@ $posterHTML = "index.html";
 $posterWAV = "nonar.wav";
 $adminPassFile = "admin/pass-admin.txt";
 $nonCopyFiles = array("small-image.jpg", "large-image.jpg", "project.mobirise");
+$csvFolder = "./csv/";
+$csvFile = "database-file.csv";
 
 $data = json_decode(file_get_contents('php://input'), true);
 
@@ -18,6 +20,7 @@ try {
     $smallImage = getDataProperty($data, 'smallImage', false); 
     $largeImage = getDataProperty($data, 'largeImage', false); 
     $xlargeImage = getDataProperty($data, 'xlargeImage', false); 
+    $thumbnail = getDataProperty($data, 'thumbnail', false); 
 
     $posterid = getDataProperty($data, 'posterid'); 
     $eventid = getDataProperty($data, 'eventid', false);
@@ -30,7 +33,7 @@ try {
     $template = getDataProperty($data, 'template');  
     $groupFolder = getDataProperty($data, 'folder'); 
     $adminPassword = getDataProperty($data, 'adminPassword', false); 
-
+    $posterUrl = getDataProperty($data, 'posterUrl');
 
     $base64qrcode = getDataProperty($data, 'base64qrcode', false);
     $narrationWavUrl = getDataProperty($data, 'narrationWavUrl', false);
@@ -54,8 +57,10 @@ try {
 
     $html = file_get_contents($posterFolder.$posterid.".html");
     
-    $tags = array("{posterid}", "{posterTitle}", "{posterAuthors}", "{posterAffiliates}", "{posterAbstract}", "{keywords}");
-    $replace = array($posterid, $title, $authors, $affiliates, $abstract, $keywords);
+    $tags = array("{posterid}", "{posterTitle}", "{posterAuthors}", "{posterAffiliates}", "{posterAbstract}", "{keywords}",
+        "{posterUrl}", "{posterDate}");
+    $replace = array($posterid, $title, $authors, $affiliates, $abstract, $keywords, 
+        $posterUrl, getPosterDate());
 
     file_put_contents($posterFolder.$posterid.".html", str_replace($tags, $replace, $html));
 
@@ -74,6 +79,11 @@ try {
         file_put_contents($posterFolder."xlarge-image.jpg", $decoded);
     }
 
+    if(!empty($thumbnail)) {
+        $decoded=base64_decode($thumbnail); 
+        file_put_contents($posterFolder."thumbnail.jpg", $decoded);
+    }
+
     if(!empty($base64qrcode)) {
         $decoded=base64_decode($base64qrcode); 
         file_put_contents($posterFolder."qr.png", $decoded);
@@ -83,11 +93,42 @@ try {
         file_put_contents($posterFolder.$adminPassFile, $adminPassword);
     }
 
+    if(!empty($eventid)) {
+        addRecordToDb($keywords, $posterid, $title, $groupFolder, $eventid);
+    }
+
     echo 'ok';
 
 } catch (Exception $e) {
     addToLogs('['.$posterid.'] Caught exception: '.$e->getMessage());
     echo 'not ok';
+}
+
+function addRecordToDb($keywords, $posterid, $title, $groupFolder, $eventid)
+{
+    global $csvFolder, $csvFile;
+
+    $dbFolder = getEventPath($groupFolder, $eventid).$csvFolder;
+
+    if(!file_exists($dbFolder)) {
+        createFolder($dbFolder);
+    }
+
+    $dbPath = $dbFolder.$csvFile;
+    $dbFileExists = file_exists($dbPath);
+
+    $handle = fopen($dbPath, "a");
+
+    if(!$dbFileExists) {
+        fputcsv($handle, array('ID', 'Category', 'Title', 'Date', 'Body text', 'link', 'image link'));
+    }
+
+
+    $posterPath = "./{$posterid}/";
+
+    fputcsv($handle, array("{$keywords}", $posterid, "{$title}", '', $posterid, $posterPath, $posterPath."thumbnail.jpg"));
+
+    fclose($handle);
 }
 
 function addToLogs($text) {
@@ -118,7 +159,7 @@ function dir_copy( $source, $target, $nonCopyFiles ) {
             }
             $Entry = $source . '/' . $entry; 
             if ( is_dir( $Entry ) ) {
-                dir_copy( $Entry, $target . '/' . $entry );
+                dir_copy( $Entry, $target . '/' . $entry, $nonCopyFiles);
                 continue;
             }
 
@@ -162,15 +203,20 @@ function download($url, $path) {
 
 function getPosterPath($groupFolder, $eventid, $posterid) {
 
-    $posterFolder = "./".$groupFolder."/";//.$eventid."/".$posterid."/";
-
-    if(!empty($eventid)) {
-        $posterFolder = $posterFolder.$eventid."/";
-    }
-
-    $posterFolder = $posterFolder.$posterid."/";
+    $posterFolder = getEventPath($groupFolder, $eventid).$posterid."/";
 
     return $posterFolder;
+}
+
+function getEventPath($groupFolder, $eventid) {
+
+    $eventFolder = "./".$groupFolder."/";
+
+    if(!empty($eventid)) {
+        $eventFolder = $eventFolder.$eventid."/";
+    }
+
+    return $eventFolder;
 }
 
 function createPosterFolder($posterFolder) {
@@ -207,5 +253,11 @@ function createFolder($folder) {
         addToLogs("failed to create folder [".$folder."]");
         exit;
     }
+}
+
+function getPosterDate() {
+
+    date_default_timezone_set('UTC');
+    return date("F j, Y");
 }
 ?>

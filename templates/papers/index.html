@@ -18,11 +18,11 @@
   <link rel="stylesheet" href="assets/facebook-plugin/style.css">
   <link rel="stylesheet" href="assets/socicon/css/styles.css">
   <link rel="stylesheet" href="assets/theme/css/style.css">
+  <link rel="stylesheet" href="assets/customization/css/style.css">
   <link rel="preload" href="https://fonts.googleapis.com/css?family=Be+Vietnam:100,100i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Be+Vietnam:100,100i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i&display=swap"></noscript>
   <link rel="preload" as="style" href="assets/mobirise/css/mbr-additional.css"><link rel="stylesheet" href="assets/mobirise/css/mbr-additional.css" type="text/css">
-  
-  
+  <script src="assets/customization/js/citation.js"></script>
   
 
 </head>
@@ -142,11 +142,12 @@ metaData:{fileName: "{posterTitle}"}
 </center></div>
 
 <section class="header4 cid-s4E9hCDKDT" id="content05-n">
-
-    
-
-    
-
+    <div class="container content-box">
+        <div class="mbr-text align-left mbr-fonts-style display-4 text-column" id="citation">
+            {posterAuthors}. {posterTitle}. Uploaded to {posterUrl}. Submitted on {posterDate}.
+        </div>
+        <a class="btn btn-primary display-4 text-button" onclick="copyToClipboard()">Copy</a>
+    </div>
     <div class="container">
         <div class="row justify-content-md-center">
             <div class=" col-md-12 col-lg-12 align-left">

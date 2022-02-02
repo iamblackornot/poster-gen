@@ -1,3 +1,5 @@
-RewriteRule /?\.htaccess$ - [F,L]
+RewriteEngine on
 
-RewriteRule ^email\.txt$ - [F,L]
+RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?posterpresentations\.com [NC]
+
+RewriteRule ^(?!index).*\.(jpg|jpeg|png|gif|csv|pdf|wav|html|css|js|txt)$ - [NC,F]

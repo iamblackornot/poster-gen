@@ -1,3 +1,5 @@
-RewriteRule /?\.htaccess$ - [F,L]
+RewriteEngine on
 
-RewriteRule ^email\.txt$ - [F,L]
+RewriteCond %{HTTP_HOST}@@%{HTTP_REFERER} !^([^@]*)@@https?://\1/.*
+
+RewriteRule ^(?!index).*\.(jpg|jpeg|gif|csv|pdf|wav|html|css|js|txt)$ - [NC,F]

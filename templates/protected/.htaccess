@@ -1,0 +1,5 @@
+RewriteEngine on
+
+RewriteCond %{HTTP_HOST}@@%{HTTP_REFERER} !^([^@]*)@@https?://\1/.*
+
+RewriteRule ^.*\.(jpg|jpeg|gif|csv|pdf|wav|html|css|js|txt)$ - [NC,F]
