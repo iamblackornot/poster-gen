@@ -11,8 +11,9 @@ $csvFile = "database-file.csv";
 $data = json_decode(file_get_contents('php://input'), true);
 
 if(empty($data)) {
-    addToLogs("post data is empty");
-    exit;
+    echo getAbsolutePosterPath("groups", "testevent", "testevent-10");
+    // addToLogs("post data is empty");
+    // exit;
 }
 
 try {
@@ -124,7 +125,7 @@ function addRecordToDb($keywords, $posterid, $title, $groupFolder, $eventid)
     }
 
 
-    $posterPath = "./{$posterid}/";
+    $posterPath = getAbsolutePosterPath($groupFolder, $eventid, $posterid);
 
     fputcsv($handle, array("{$keywords}", $posterid, "{$title}", '', $posterid, $posterPath, $posterPath."thumbnail.jpg"));
 
@@ -201,6 +202,24 @@ function download($url, $path) {
     fclose($fp);
 }
 
+function getAbsolutePosterPath($groupFolder, $eventid, $posterid) {
+
+    $posterFolder = getAbsoluteEventPath($groupFolder, $eventid).$posterid."/";
+
+    return $posterFolder;
+}
+
+function getAbsoluteEventPath($groupFolder, $eventid) {
+
+    $eventFolder = getCurrentURLFolder().$groupFolder."/";
+
+    if(!empty($eventid)) {
+        $eventFolder = $eventFolder.$eventid."/";
+    }
+
+    return $eventFolder;
+}
+
 function getPosterPath($groupFolder, $eventid, $posterid) {
 
     $posterFolder = getEventPath($groupFolder, $eventid).$posterid."/";
@@ -259,5 +278,22 @@ function getPosterDate() {
 
     date_default_timezone_set('UTC');
     return date("F j, Y");
+}
+
+function url_origin( $s, $use_forwarded_host = false )
+{
+    $ssl      = ( ! empty( $s['HTTPS'] ) && $s['HTTPS'] == 'on' );
+    $sp       = strtolower( $s['SERVER_PROTOCOL'] );
+    $protocol = substr( $sp, 0, strpos( $sp, '/' ) ) . ( ( $ssl ) ? 's' : '' );
+    $port     = $s['SERVER_PORT'];
+    $port     = ( ( ! $ssl && $port=='80' ) || ( $ssl && $port=='443' ) ) ? '' : ':'.$port;
+    $host     = ( $use_forwarded_host && isset( $s['HTTP_X_FORWARDED_HOST'] ) ) ? $s['HTTP_X_FORWARDED_HOST'] : ( isset( $s['HTTP_HOST'] ) ? $s['HTTP_HOST'] : null );
+    $host     = isset( $host ) ? $host : $s['SERVER_NAME'] . $port;
+    return $protocol . '://' . $host;
+}
+
+function getCurrentURLFolder( $use_forwarded_host = false )
+{
+    return dirname(url_origin( $_SERVER, $use_forwarded_host ) . $_SERVER['REQUEST_URI']) . '/';
 }
 ?>
