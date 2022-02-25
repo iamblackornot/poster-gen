@@ -19,3 +19,29 @@
 .text-column {
   max-width: 80%;
 }
+
+#pdf-youtube-section {
+  height: 64px;
+  margin-bottom: 15px;
+}
+
+#open-video-modal:hover #youtube-button,
+#close-video-modal:focus #youtube-button {
+  filter: invert(50%);
+}
+
+
+#download-pdf:hover #pdf-button,
+#download-pdf:focus #pdf-button {
+  filter: invert(50%);
+}
+
+#pdf-youtube-section a,
+#pdf-button, #youtube-button{
+  height: 100%;
+  padding: 5px 10px;
+}
+
+#pdf-youtube-section a {
+  border-style: solid;
+}

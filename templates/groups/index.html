@@ -19,10 +19,10 @@
   <link rel="stylesheet" href="assets/socicon/css/styles.css">
   <link rel="stylesheet" href="assets/theme/css/style.css">
   <link rel="stylesheet" href="assets/customization/css/style.css">
+  <link rel="stylesheet" href="assets/customization/css/modal.css">
   <link rel="preload" href="https://fonts.googleapis.com/css?family=Be+Vietnam:100,100i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Be+Vietnam:100,100i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i&display=swap"></noscript>
   <link rel="preload" as="style" href="assets/mobirise/css/mbr-additional.css"><link rel="stylesheet" href="assets/mobirise/css/mbr-additional.css" type="text/css">
-  <script src="assets/customization/js/citation.js"></script>
   
   <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-467012-1"></script>
@@ -39,19 +39,23 @@
 <body>
   
   <section class="info02 cid-rVtYPjG2uX" id="info02-2">
-
-    
-
-    
-
     <div class="container align-center">
         <div class="row justify-content-center">
             <div class="mbr-black col-md-12 col-lg-10">
                 <h4 class="mbr-section-subtitle mbr-regular mbr-fonts-style display-7">{posterAffiliates}</h4>
                 <h3 class="mbr-section-title mbr-regular mbr-white pb-4 mbr-fonts-style display-1"><div><strong>{posterTitle}</strong></div></h3>
                 <p class="mbr-text pb-4 mbr-white mbr-regular mbr-fonts-style display-7">		{posterAuthors}<br></p>
-                <div class="mbr-section-btn"><a class="btn btn-md btn-white-outline display-4" href="{posterid}.pdf" target="_blank">DOWNLOAD PDF</a></div>
+                <div id="pdf-youtube-section" class="mbr-section-btn">
+                    <a id='download-pdf' class="btn btn-md btn-white-outline display-4" href="{posterid}.pdf" target="_blank">
+                        <img id="pdf-button" alt="DOWNLOAD PDF" src="assets/customization/pdf.svg">
+                    </a>
+                    <a id='open-video-modal' class="btn btn-md btn-white-outline display-4">
+                        <img id="youtube-button" alt="VIDEO" src="assets/customization/youtube.svg">
+                    </a>
+                </div>
             </div>
+        </div>
+    </div>
     <!-- audio player code starts here-->        
             <center>
 <figure>
@@ -128,7 +132,7 @@ body {
         <div class="mbr-text align-left mbr-fonts-style display-4 text-column" id="citation">
             {posterAuthors}. {posterTitle}. Uploaded to {posterUrl}. Submitted on {posterDate}.
         </div>
-        <a class="btn btn-primary display-4 text-button" onclick="copyToClipboard()">Copy</a>
+        <a class="btn btn-primary display-4 text-button" onclick="copyToClipboard()">COPY</a>
     </div>
     <div class="container">
         <div class="row justify-content-md-center">
@@ -219,8 +223,22 @@ body {
     </div>
 </section>
 
+<!-- video popup frame -->
 
-<script src="assets/web/assets/jquery/jquery.min.js"></script>
+<div id="videoModal" class="modal">
+    <div id="modal-header">
+        <span id="close-video-modal" aria-hidden="true" class="close">&times;</span>
+    </div>
+    <div class="modal-content-custom">
+      <div id="modal-video-block">
+          <iframe id="youtube-frame" src="https://www.youtube.com/embed/{videoid}?rel=0&amp;amp;showinfo=0&amp;autoplay=0&amp;loop=0"
+                  width="1280" height="720" frameborder="0" allowfullscreen=""></iframe>
+      </div>
+    </div>
+</div>
+
+
+  <script src="assets/web/assets/jquery/jquery.min.js"></script>
   <script src="assets/popper/popper.min.js"></script>
   <script src="assets/tether/tether.min.js"></script>
   <script src="assets/bootstrap/js/bootstrap.min.js"></script>
@@ -228,8 +246,8 @@ body {
   <script src="assets/facebook-plugin/facebook-script.js"></script>
   <script src="assets/smoothscroll/smooth-scroll.js"></script>
   <script src="assets/theme/js/script.js"></script>
-  
-  
+  <script src="assets/customization/js/modal.js"></script>
+  <script src="assets/customization/js/citation.js"></script>
   
 <script>"use strict";if("loading"in HTMLImageElement.prototype){document.querySelectorAll('img[loading="lazy"],iframe[loading="lazy"]').forEach(e=>{e.src=e.dataset.src,e.style.paddingTop=100*e.getAttribute("data-aspectratio")+"%",e.style.height=0,e.onload=function(){e.removeAttribute("style")}})}else{const e=document.createElement("script");e.src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js",document.body.appendChild(e)}</script>
 

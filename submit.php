@@ -7,13 +7,14 @@ $adminPassFile = "admin/pass-admin.txt";
 $nonCopyFiles = array("small-image.jpg", "large-image.jpg", "project.mobirise");
 $csvFolder = "./csv/";
 $csvFile = "database-file.csv";
+$defaultVideoID = "R0UOOVuKVAQ";
 
 $data = json_decode(file_get_contents('php://input'), true);
 
 if(empty($data)) {
-    echo getAbsolutePosterPath("groups", "testevent", "testevent-10");
-    // addToLogs("post data is empty");
-    // exit;
+
+    addToLogs("post data is empty");
+    exit;
 }
 
 try {
@@ -39,6 +40,7 @@ try {
     $base64qrcode = getDataProperty($data, 'base64qrcode', false);
     $narrationWavUrl = getDataProperty($data, 'narrationWavUrl', false);
     $pdfUrl = getDataProperty($data, 'pdfUrl'); 
+    $videoid = getDataProperty($data, 'videoid', false, $defaultVideoID); 
 
     $posterFolder = createPosterFolder(getPosterPath($groupFolder, $eventid, $posterid));
    
@@ -59,9 +61,9 @@ try {
     $html = file_get_contents($posterFolder.$posterid.".html");
     
     $tags = array("{posterid}", "{posterTitle}", "{posterAuthors}", "{posterAffiliates}", "{posterAbstract}", "{keywords}",
-        "{posterUrl}", "{posterDate}");
+        "{posterUrl}", "{posterDate}", "{videoid}");
     $replace = array($posterid, $title, $authors, $affiliates, $abstract, $keywords, 
-        $posterUrl, getPosterDate());
+        $posterUrl, getPosterDate(), $videoid);
 
     file_put_contents($posterFolder.$posterid.".html", str_replace($tags, $replace, $html));
 
