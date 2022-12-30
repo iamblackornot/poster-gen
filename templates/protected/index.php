@@ -21,23 +21,6 @@ if(empty($pass) || isset($_GET['page'])) {
 
 function showEventPage() {
 
-    //$path = 'index.html';
-    // if(isset($_GET['page'])) {
-    //     //$path = $path.'?page='.$_GET['page'];
-    //     $path = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-    //     //$path = $path.'?page='.$_GET['page'];
-    //     $path = preg_replace('/(\?page\=\d+)$/i', 'index.html$1', $path);
-    //     // echo $path;
-    //     // exit(0);
-
-    // }
-
-    // // $opts = array('http'=>array('header' => "User-Agent:MyAgent/1.0\r\n")); 
-    // // //Basically adding headers to the request
-    // // $context = stream_context_create($opts);
-    // // echo file_get_contents($path, false, $context);
-    // // //readfile(urlencode($path));
-    //readfile($path);
     redirect();
 }
 
