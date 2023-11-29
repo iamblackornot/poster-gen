@@ -43,18 +43,28 @@ try {
     $videoid = getDataProperty($data, 'videoid', false, $defaultVideoID); 
 
     $posterFolder = createPosterFolder(getPosterPath($groupFolder, $eventid, $posterid));
-   
+
+    if(!download($pdfUrl, $posterFolder.$posterid.".pdf")) {
+
+        echo "failed to download ", $pdfUrl;
+        removeFolder($posterFolder);
+        return;
+    };
+
+    if(!empty($narrationWavUrl)) {
+
+        if(!download($narrationWavUrl, $posterFolder.$posterid.".wav")) {
+
+            echo "failed to download ", $narrationWavUrl;
+            removeFolder($posterFolder);
+            return;
+        }
+    }
+
     dir_copy($templatesFolder.$template."/", $posterFolder, $nonCopyFiles);
 
     rename($posterFolder.$posterHTML, $posterFolder.$posterid.".html");
     rename($posterFolder.$posterWAV, $posterFolder.$posterid.".wav");
-
-    download($pdfUrl, $posterFolder.$posterid.".pdf");
-
-    if(!empty($narrationWavUrl)) {
-
-        download($narrationWavUrl, $posterFolder.$posterid.".wav");
-    }
 
     file_put_contents($posterFolder."email.txt", $email);
 
@@ -153,8 +163,12 @@ function getDataProperty($data, $name, $required = true, $defaultValue = '') {
 }
 
 function dir_copy( $source, $target, $nonCopyFiles ) {
-    if ( is_dir( $source ) ) {
-        mkdir( $target, 0755, true );
+    if (is_dir($source)) {
+
+        if(!is_dir($target)) {
+            mkdir( $target, 0755, true );
+        }
+        
         $d = dir( $source );
         while ( FALSE !== ( $entry = $d->read() ) ) {
             if ( $entry == '.' || $entry == '..' ) {
@@ -199,9 +213,28 @@ function download($url, $path) {
     curl_setopt($ch, CURLOPT_FILE, $fp); 
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
-    curl_exec($ch); 
+    curl_exec($ch);
+    
+    if (curl_errno($ch)) {
+        $curlErrorMessage = "CURL Error: " . curl_error($ch);
+        addToLogs($curlErrorMessage);
+        echo $curlErrorMessage, PHP_EOL;
+        return false;
+    }
+
+    $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if ($responseCode >= 400) {
+        $httpErrorMessage =  "HTTP Error: " . $responseCode;
+        addToLogs($httpErrorMessage);
+        echo $httpErrorMessage, PHP_EOL;
+        return false;
+    }
+
     curl_close($ch);
     fclose($fp);
+
+    return true;
 }
 
 function getAbsolutePosterPath($groupFolder, $eventid, $posterid) {
@@ -274,6 +307,27 @@ function createFolder($folder) {
         addToLogs("failed to create folder [".$folder."]");
         exit;
     }
+}
+
+function removeFolder($dirPath) {
+
+    if(empty($dirPath) || $dirPath == "/" || $dirPath == "./") return;
+
+    if (! is_dir($dirPath)) {
+        throw new InvalidArgumentException("$dirPath must be a directory");
+    }
+    if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
+        $dirPath .= '/';
+    }
+    $files = glob($dirPath . '*', GLOB_MARK);
+    foreach ($files as $file) {
+        if (is_dir($file)) {
+            removeFolder($file);
+        } else {
+            unlink($file);
+        }
+    }
+    rmdir($dirPath);
 }
 
 function getPosterDate() {
